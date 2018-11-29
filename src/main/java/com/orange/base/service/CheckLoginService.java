@@ -1,15 +1,23 @@
 package com.orange.base.service;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.orange.base.entity.JSONResult;
+import com.orange.base.util.EncryptionUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Service
 public class CheckLoginService {
+
+    @Autowired
+    JqueryCommonService jqueryCommonService ;
 
     /**
      * 校验密码，密码通过写入session
@@ -18,14 +26,20 @@ public class CheckLoginService {
      * @param session session
      * @return JSONResult
      */
-    public JSONResult check(String userId, String passWord, HttpSession session){
+    public JSONResult check(String userId, String passWord, HttpSession session) throws Exception {
 
-        int status = 0 ;
-        String msg = "" ;
-        // TO-DO 密码加密
-        passWord = passWord+"1" ;
-        // TO-DO 查数据库
+        Map<String,Object> map = new HashMap<>() ;
+        map.put("userId",userId) ;
+
+        int status ;
+        String msg ;
+        // todo 密码加密
+        passWord = EncryptionUtil.getCipherByStr(passWord);
+        // TODO 查数据库
         List<Map<String,String>> resList = new ArrayList<>() ;
+        String str = jqueryCommonService.handle("com.orange.base.mapper.DoLoginMapper.doLogin",map) ;
+        JSONArray json = JSONArray.parseArray(str) ;
+        JSONObject obj = (JSONObject) json.get(0);
         if(resList.size()==0){
             status = 201 ;
             msg = "用户不存在。" ;
